@@ -695,15 +695,19 @@ body::after {
   }
 
   .avatar-container {
-    width: 280px;
-    height: 280px;
-    transform: scale(0.85);
-    /* Proper scaling for mobile */
+    width: 300px;
+    height: 300px;
+    transform: scale(0.45);
+    /* Scale down properly to fit mobile width */
+    transform-origin: center center;
+    margin-top: -50px;
+    /* Pull up to reduce gap caused by scaling empty space */
   }
 
+  /* Keep sun core large so it scales with container ratio */
   .sun-core {
-    width: 120px;
-    height: 120px;
+    width: 350px;
+    height: 350px;
   }
 
 
