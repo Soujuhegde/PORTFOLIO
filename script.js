@@ -49,20 +49,35 @@ function initNavbar() {
 
 function initTypingEffect() {
     const typingText = document.getElementById('typing-text');
-    const phrase = 'Software Developer';
-
-    let currentCharIndex = 0;
+    const phrases = ['Data Scientist', 'AI Engineer'];
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
     let typingSpeed = 100;
 
     function typeEffect() {
-        // Typing characters
-        typingText.textContent = phrase.substring(0, currentCharIndex + 1);
-        currentCharIndex++;
+        const currentPhrase = phrases[phraseIndex];
 
-        // When word is complete, stop recursion
-        if (currentCharIndex <= phrase.length) {
-            setTimeout(typeEffect, typingSpeed);
+        if (isDeleting) {
+            typingText.textContent = currentPhrase.substring(0, charIndex - 1);
+            charIndex--;
+            typingSpeed = 50;
+        } else {
+            typingText.textContent = currentPhrase.substring(0, charIndex + 1);
+            charIndex++;
+            typingSpeed = 100;
         }
+
+        if (!isDeleting && charIndex === currentPhrase.length) {
+            isDeleting = true;
+            typingSpeed = 1500; // Pause at end of phrase
+        } else if (isDeleting && charIndex === 0) {
+            isDeleting = false;
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+            typingSpeed = 500; // Pause before new phrase
+        }
+
+        setTimeout(typeEffect, typingSpeed);
     }
 
     typeEffect();
