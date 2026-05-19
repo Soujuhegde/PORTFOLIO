@@ -9,8 +9,7 @@ The website features smooth animations, typing effects, responsive design, and a
 
 ## 🔗 Live Demo
 You can preview the portfolio locally by opening `index.html` in a modern browser.  
-Or access the online demo here: [Live Demo]
-
+Or access the online demo here: [https://soujanya-sp-techfolio-dev.vercel.app/]
 ---
 
 ## 🚀 Features
@@ -46,9 +45,9 @@ Or access the online demo here: [Live Demo]
 ## 📬 Contact
 
 - Email: spsoujanya02@gmail.com   
-- Location:Bangalore, India
+- Location: Bangalore, India
 - LinkedIn: [LinkedIn](https://Linkedin.com/in/soujanya-sp-995a92296)  
 - GitHub: [GitHub](https://github.com/Soujuhegde)  
 ---
 
-Made with ❤️ by **Soujanya S P **
+Made with ❤️ by ** Soujanya S P **
