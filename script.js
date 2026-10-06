@@ -87,18 +87,29 @@ function initTypingEffect() {
 
 function initOrbitAnimations() {
     const planets = document.querySelectorAll('.random-orbit');
+    const total = planets.length;
+    if (total === 0) return;
+
+    // Distribute icons across 3 balanced concentric orbit rings around the avatar
+    const rings = [220, 270, 320];
 
     planets.forEach((planet, index) => {
-        const startAngle = Math.random() * 360;
-        const radius = 215 + (index * 50);
+        const ringIndex = index % rings.length;
+        const countInRing = Math.ceil(total / rings.length);
+        const posInRing = Math.floor(index / rings.length);
 
-        const duration = 15 + Math.random() * 15;
-        const direction = Math.random() > 0.5 ? 'normal' : 'reverse';
-        const delay = 0;
+        // Stagger angles so icons don't overlap
+        const baseAngle = (posInRing * (360 / countInRing)) + (ringIndex * 40);
+        const startAngle = (baseAngle + ((index * 13) % 25)) % 360;
+        const radius = rings[ringIndex];
+
+        // Smooth speeds per orbit layer
+        const duration = 20 + (ringIndex * 6) + ((index * 3) % 7);
+        const direction = (ringIndex % 2 === 0) ? 'normal' : 'reverse';
 
         planet.style.transform = `rotate(${startAngle}deg) translateX(${radius}px) rotate(-${startAngle}deg)`;
 
-        const animationName = `orbit${index}`;
+        const animationName = `orbit_ring_${index}`;
         const keyframes = `
             @keyframes ${animationName} {
                 from {
@@ -115,7 +126,6 @@ function initOrbitAnimations() {
         document.head.appendChild(styleSheet);
 
         planet.style.animation = `${animationName} ${duration}s linear infinite ${direction}`;
-        planet.style.animationDelay = `${delay}s`;
 
         planet.addEventListener('mouseenter', () => {
             planet.style.animationPlayState = 'paused';
