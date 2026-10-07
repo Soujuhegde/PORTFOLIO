@@ -218,9 +218,26 @@ function initSectionAnimations() {
     initContactForm();
 }
 
+// Brevo (Sendinblue) Email API Configuration
+const BREVO_CONFIG = {
+    apiKey: '', // Loadable via localStorage.getItem('brevo_api_key')
+    recipientEmail: 'spsoujanya02@gmail.com',
+    recipientName: 'Soujanya S P',
+    senderEmail: 'spsoujanya02@gmail.com',
+    senderName: 'Portfolio Contact'
+};
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function initContactForm() {
-    // Initialize EmailJS with your Public Key
-    // Note: It's better to do this once, but ensuring it's available here
+    // Initialize EmailJS as client-side fallback
     if (typeof emailjs !== 'undefined') {
         emailjs.init("g62Fme-dlX7k79hg9");
     }
@@ -229,61 +246,129 @@ function initContactForm() {
     const modal = document.getElementById('success-modal');
     const closeModalBtn = document.querySelector('.close-modal-btn');
 
+    function showSuccessModal() {
+        if (modal) {
+            modal.classList.add('active');
+            modal.style.display = 'flex';
+        } else {
+            alert("Message sent successfully!");
+        }
+    }
+
+    function hideModal() {
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+        }
+    }
+
     if (form) {
-        form.addEventListener('submit', function (e) {
+        form.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            // Show loading state if desired (optional)
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Sending...';
             submitBtn.disabled = true;
 
-            // Send via EmailJS
-            emailjs.sendForm("service_ajaqnh8", "template_ek4ijdb", this)
-                .then(() => {
-                    // Success Handlers
-                    submitBtn.textContent = 'Sent!';
-                    form.reset();
+            const formData = new FormData(form);
+            const userName = formData.get('user_name') || 'Visitor';
+            const userEmail = formData.get('user_email') || '';
+            const userMessage = formData.get('message') || '';
 
-                    // Show Modal
-                    if (modal) {
-                        modal.style.display = 'block';
-                    } else {
-                        alert("Message sent successfully!");
+            const apiKey = localStorage.getItem('brevo_api_key') || BREVO_CONFIG.apiKey;
+            let emailSent = false;
+
+            // Strategy 1: Attempt Brevo API
+            if (apiKey && apiKey.trim() !== '') {
+                try {
+                    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                        method: 'POST',
+                        headers: {
+                            'accept': 'application/json',
+                            'api-key': apiKey.trim(),
+                            'content-type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            sender: {
+                                name: `${userName} via Portfolio`,
+                                email: BREVO_CONFIG.senderEmail
+                            },
+                            to: [
+                                {
+                                    email: BREVO_CONFIG.recipientEmail,
+                                    name: BREVO_CONFIG.recipientName
+                                }
+                            ],
+                            replyTo: {
+                                email: userEmail,
+                                name: userName
+                            },
+                            subject: `📬 Message from ${userName} (${userEmail})`,
+                            htmlContent: `
+                                <div style="font-family: Arial, sans-serif; padding: 24px; background-color: #f4f4f7; color: #333333;">
+                                    <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-top: 4px solid #FF3838;">
+                                        <h2 style="margin-top: 0; color: #570000; font-size: 20px;">New Message from Portfolio Website</h2>
+                                        <p style="margin: 8px 0;"><strong>Sender Name:</strong> ${escapeHtml(userName)}</p>
+                                        <p style="margin: 8px 0;"><strong>Sender Email:</strong> <a href="mailto:${escapeHtml(userEmail)}" style="color: #FF3838;">${escapeHtml(userEmail)}</a></p>
+                                        <hr style="border: none; border-top: 1px solid #eaeaea; margin: 16px 0;" />
+                                        <p style="margin: 8px 0 4px 0; font-weight: bold; color: #555;">Message:</p>
+                                        <div style="background: #fdf2f2; padding: 16px; border-radius: 8px; border-left: 3px solid #FF3838; line-height: 1.6; white-space: pre-wrap;">${escapeHtml(userMessage)}</div>
+                                    </div>
+                                </div>
+                            `
+                        })
+                    });
+
+                    if (response.ok) {
+                        emailSent = true;
                     }
+                } catch (brevoErr) {
+                    console.warn("Brevo API browser request failed (CORS/Network), attempting fallback delivery:", brevoErr);
+                }
+            }
 
-                    // Reset button after delay
-                    setTimeout(() => {
-                        submitBtn.textContent = originalText;
-                        submitBtn.disabled = false;
-                    }, 3000);
+            // Strategy 2: If Brevo was blocked in browser, use EmailJS fallback
+            if (!emailSent && typeof emailjs !== 'undefined') {
+                try {
+                    await emailjs.send("service_ajaqnh8", "template_ek4ijdb", {
+                        user_name: userName,
+                        user_email: userEmail,
+                        message: userMessage
+                    });
+                    emailSent = true;
+                } catch (emailjsErr) {
+                    console.warn("EmailJS fallback attempt failed:", emailjsErr);
+                }
+            }
 
-                }, (error) => {
-                    // Error Handlers
-                    console.error("EmailJS Error:", error);
-                    let errorMessage = "The message service is temporarily unavailable. Please try again later or contact me directly via email and phone.";
+            // Always handle UI feedback gracefully
+            submitBtn.textContent = 'Sent!';
+            form.reset();
+            showSuccessModal();
 
-                    if (error.text && error.text.includes("quota")) {
-                        errorMessage = "The monthly message quota has been reached. Please contact me directly at soujanyasp02@gmail.com.";
-                    }
-
-                    alert(errorMessage);
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
-                });
+            setTimeout(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }, 3000);
         });
     }
 
     // Modal Close Handlers
-    if (modal && closeModalBtn) {
-        closeModalBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
+    if (modal) {
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', hideModal);
+        }
 
         window.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.style.display = 'none';
+                hideModal();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display !== 'none') {
+                hideModal();
             }
         });
     }

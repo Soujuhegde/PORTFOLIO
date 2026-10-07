@@ -15,10 +15,11 @@ Or access the online demo here: [https://soujanya-sp-techfolio-dev.vercel.app/]
 ## 🚀 Features
 
 - ⚡ **Responsive Design** — Works perfectly on all devices  
+- 🤖 **Sarvam AI Chatbot** — Interactive AI assistant integrated with Sarvam AI API for answering queries about projects, stack, and experience
 - 🎨 **Typing Effect** — Animated text to showcase skills  
 - 🌍 **Smooth Scroll** — Fluid navigation between sections  
 - 💻 **Clean Structure** — Modular HTML, CSS, and JS  
-- 📧 **Contact Form** — Integrated with [EmailJS](https://www.emailjs.com/) for instant messaging  
+- 📧 **Contact Form** — Integrated with [Brevo (Sendinblue) API](https://www.brevo.com/) for transactional email delivery  
 
 ---
 
@@ -27,9 +28,10 @@ Or access the online demo here: [https://soujanya-sp-techfolio-dev.vercel.app/]
 | Category | Tools |
 |-----------|--------|
 | **Frontend** | HTML5, CSS3, JavaScript (ES6+) |
+| **AI Integration** | Sarvam AI API (`sarvam-105b` / `sarvam-105b-conversations`) |
 | **Animations** | CSS keyframes, IntersectionObserver |
-| **Form Handling** | EmailJS |
-| **Deployment** | GitHub Pages |
+| **Email Service** | Brevo (Sendinblue) SMTP / REST API |
+| **Deployment** | GitHub Pages / Vercel |
 
 ---
 
